@@ -435,6 +435,7 @@
             </div>
             
             <form method="post" action="/add-team/">
+                {% csrf_token %}
                 <div class="team-input-group">
                     <input type="text" name="name" class="custom-input" placeholder="Enter team name..." required maxlength="25">
                     <button type="submit" class="btn btn-primary"><span>Add Team</span></button>
@@ -462,6 +463,7 @@
                         <td><strong>{{ team }}</strong></td>
                         <td>
                             <form method="post" action="/delete-team/{{ forloop.counter0 }}/" style="display: inline;">
+                                {% csrf_token %}
                                 <button type="submit" class="btn btn-danger btn-small"><span>Remove</span></button>
                             </form>
                         </td>
@@ -471,6 +473,7 @@
             </table>
             
             <form method="post" action="/clear-teams/">
+                {% csrf_token %}
                 <button type="submit" class="btn btn-danger" style="width: 100%;"><span>Clear All Teams</span></button>
             </form>
             {% else %}
@@ -496,6 +499,7 @@
                     </div>
                     {% endif %}
                     <form method="post" action="/start-knockout/">
+                        {% csrf_token %}
                         <button type="submit" class="btn btn-success" style="flex: 1;"><span>Launch</span></button>
                     </form>
                 </div>
@@ -504,6 +508,7 @@
                     <h3>🔄 League</h3>
                     <p>Round-robin format - Everyone plays everyone</p>
                     <form method="post" action="/start-league/">
+                        {% csrf_token %}
                         <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
                             <span style="font-size: 1em;">Rounds:</span>
                             <input type="number" name="num_rounds" value="1" min="1" max="10" style="width: 80px; padding: 12px; background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 8px; color: #fff; text-align: center; font-size: 1.1em; font-weight: 700;">
@@ -516,6 +521,7 @@
                     <h3>🎯 Multi-Stage</h3>
                     <p>Group stage followed by knockout playoffs</p>
                     <form method="post" action="/start-multistage/">
+                        {% csrf_token %}
                         <button type="submit" class="btn btn-success" style="flex: 1;"><span>Launch</span></button>
                     </form>
                 </div>
