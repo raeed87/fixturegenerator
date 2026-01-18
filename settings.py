@@ -1,5 +1,6 @@
 """Django Settings"""
 from pathlib import Path
+import os
 
 BASE_DIR = Path(__file__).resolve().parent
 SECRET_KEY = 'django-insecure-key'
@@ -44,3 +45,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Ensure data directory exists
+DATA_DIR = BASE_DIR / 'data'
+DATA_DIR.mkdir(exist_ok=True)
