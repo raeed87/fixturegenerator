@@ -54,32 +54,30 @@ def clear_teams(request):
     return redirect('home')
 
 def start_league_tournament(request):
-    if request.method == 'POST':
-        teams = load_teams()
-        if len(teams) < 2:
-            return redirect('home')
-        
-        num_rounds = int(request.POST.get('num_rounds', 1))
-        
-        # Initialize stats
-        stats = {team: {'P': 0, 'W': 0, 'D': 0, 'L': 0, 'GF': 0, 'GA': 0, 'GD': 0, 'Pts': 0} for team in teams}
-        
-        # Generate fixtures
-        base = [(teams[i], teams[j]) for i in range(len(teams)) for j in range(i+1, len(teams))]
-        all_matches = []
-        for _ in range(num_rounds):
-            r = base.copy()
-            random.shuffle(r)
-            all_matches.extend(r)
-        
-        league_data = {
-            'stats': stats,
-            'matches': all_matches,
-            'current_match': 0
-        }
-        save_league(league_data)
-        return redirect('league_match')
-    return redirect('home')
+    teams = load_teams()
+    if len(teams) < 2:
+        return redirect('home')
+    
+    num_rounds = int(request.POST.get('num_rounds', 1)) if request.method == 'POST' else 1
+    
+    # Initialize stats
+    stats = {team: {'P': 0, 'W': 0, 'D': 0, 'L': 0, 'GF': 0, 'GA': 0, 'GD': 0, 'Pts': 0} for team in teams}
+    
+    # Generate fixtures
+    base = [(teams[i], teams[j]) for i in range(len(teams)) for j in range(i+1, len(teams))]
+    all_matches = []
+    for _ in range(num_rounds):
+        r = base.copy()
+        random.shuffle(r)
+        all_matches.extend(r)
+    
+    league_data = {
+        'stats': stats,
+        'matches': all_matches,
+        'current_match': 0
+    }
+    save_league(league_data)
+    return redirect('league_match')
 
 def league_match(request):
     league_data = load_league()
