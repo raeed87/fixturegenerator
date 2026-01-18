@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Group Results - Multi-Stage Tournament</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Rajdhani', sans-serif;
+            background: #0a0e27;
+            color: #fff;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0, 85, 85, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0, 51, 51, 0.1) 0%, transparent 50%);
+            z-index: -1;
+        }
+        
+        .hero {
+            position: relative;
+            padding: 60px 20px;
+            text-align: center;
+            background: linear-gradient(135deg, #005555 0%, #003333 100%);
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+            margin-bottom: 60px;
+        }
+        
+        .hero h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3em;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+        
+        .hero p {
+            font-size: 1.2em;
+            color: rgba(255,255,255,0.8);
+            font-weight: 300;
+        }
+        
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 30px 60px;
+        }
+        
+        .groups-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 30px;
+            margin: 30px 0;
+        }
+        
+        .group-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 2px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            padding: 25px;
+            transition: all 0.3s;
+        }
+        
+        .group-card:hover {
+            border-color: rgba(0, 85, 85, 0.5);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 85, 85, 0.2);
+        }
+        
+        .group-header {
+            background: linear-gradient(135deg, rgba(0, 85, 85, 0.2) 0%, rgba(0, 51, 51, 0.2) 100%);
+            border: 2px solid rgba(0, 85, 85, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .group-name {
+            font-size: 2em;
+            font-weight: 700;
+            color: #005555;
+        }
+        
+        .group-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 5px;
+            font-size: 0.95em;
+        }
+        
+        .group-table thead th {
+            background: linear-gradient(135deg, rgba(0, 85, 85, 0.4) 0%, rgba(0, 51, 51, 0.4) 100%);
+            padding: 15px 8px;
+            text-align: center;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.85em;
+            color: #005555;
+            border: 1px solid rgba(0, 85, 85, 0.3);
+        }
+        
+        .group-table thead th:first-child { border-radius: 12px 0 0 12px; }
+        .group-table thead th:last-child { border-radius: 0 12px 12px 0; }
+        
+        .group-table tbody tr {
+            background: rgba(255, 255, 255, 0.02);
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .group-table tbody tr.qualified-team {
+            background: linear-gradient(135deg, rgba(0, 85, 85, 0.2) 0%, rgba(0, 102, 102, 0.15) 100%);
+            border: 2px solid rgba(0, 85, 85, 0.5);
+            box-shadow: 0 0 15px rgba(0, 85, 85, 0.3);
+        }
+        
+        .qualified-badge {
+            color: #ffd700;
+            font-size: 0.7em;
+            font-weight: 900;
+            text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+        }
+        
+        .group-table tbody td {
+            padding: 15px 8px;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .group-table tbody td:first-child {
+            border-radius: 12px 0 0 12px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 1.05em;
+            padding-left: 15px;
+        }
+        
+        .group-table tbody td:last-child {
+            border-radius: 0 12px 12px 0;
+            font-weight: 900;
+            font-size: 1.1em;
+            background: linear-gradient(135deg, rgba(0, 85, 85, 0.2) 0%, rgba(0, 51, 51, 0.1) 100%);
+            color: #55aaaa;
+        }
+        
+        .btn {
+            padding: 18px 35px;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-decoration: none;
+            display: inline-block;
+            margin: 20px 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #005555 0%, #003333 100%);
+            color: #fff;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .navigation {
+            text-align: center;
+            margin: 40px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <h1>📊 Group Results</h1>
+        <p>Final Group Stage Standings</p>
+    </div>
+    
+    <div class="main-container">
+        <div class="groups-grid">
+            {% for group in sorted_groups %}
+            <div class="group-card">
+                <div class="group-header">
+                    <div class="group-name">Group {{ group.name }}</div>
+                </div>
+                
+                <table class="group-table">
+                    <thead>
+                        <tr>
+                            <th>Pos</th>
+                            <th>Team</th>
+                            <th>P</th>
+                            <th>W</th>
+                            <th>D</th>
+                            <th>L</th>
+                            <th>GF</th>
+                            <th>GA</th>
+                            <th>GD</th>
+                            <th>Pts</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for team, stat in group.sorted_stats %}
+                        <tr{% if team in multistage_data.qualified_teams %} class="qualified-team"{% endif %}>
+                            <td><strong>{{ forloop.counter }}</strong></td>
+                            <td><strong>{{ team }}{% if team in multistage_data.qualified_teams %} <span class="qualified-badge">🏆 QUALIFIED</span>{% endif %}</strong></td>
+                            <td>{{ stat.P }}</td>
+                            <td>{{ stat.W }}</td>
+                            <td>{{ stat.D }}</td>
+                            <td>{{ stat.L }}</td>
+                            <td>{{ stat.GF }}</td>
+                            <td>{{ stat.GA }}</td>
+                            <td>{% if stat.GD > 0 %}+{% endif %}{{ stat.GD }}</td>
+                            <td>{{ stat.Pts }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="navigation">
+            <a href="/multistage/" class="btn btn-secondary">← Back to Tournament</a>
+            <a href="/" class="btn btn-primary">🏠 Home</a>
+        </div>
+    </div>
+</body>
+</html>

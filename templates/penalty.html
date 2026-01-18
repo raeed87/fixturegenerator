@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Penalty Shootout</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Rajdhani', sans-serif;
+            background: #0a0e27;
+            color: #fff;
+            overflow-x: hidden;
+        }
+        
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 165, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(255, 69, 0, 0.1) 0%, transparent 50%);
+            z-index: -1;
+        }
+        
+        /* Hero Header */
+        .hero {
+            position: relative;
+            padding: 60px 20px;
+            text-align: center;
+            background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+            margin-bottom: 60px;
+        }
+        
+        .hero::after {
+            content: '🎯';
+            position: absolute;
+            font-size: 200px;
+            opacity: 0.08;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: float 6s ease-in-out infinite;
+            will-change: transform;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+            50% { transform: translate(-50%, -55%) rotate(180deg); }
+        }
+        
+        .hero h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4em;
+            font-weight: 900;
+            background: linear-gradient(90deg, #000, #333, #000);
+            background-size: 200% 100%;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            animation: subtleShine 4s ease-in-out infinite;
+            will-change: background-position;
+        }
+        
+        @keyframes subtleShine {
+            0%, 100% { background-position: -100% 0; }
+            50% { background-position: 100% 0; }
+        }
+        
+        .hero p {
+            font-size: 1.3em;
+            color: rgba(0,0,0,0.8);
+            font-weight: 700;
+        }
+        
+        /* Main Container */
+        .main-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 30px 60px;
+        }
+        
+        /* Glass Card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            transform: translateZ(0);
+        }
+        
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2em;
+            margin-bottom: 30px;
+            color: #fff;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .section-title::before,
+        .section-title::after {
+            content: '';
+            width: 5px;
+            height: 30px;
+            background: linear-gradient(to bottom, #ffd700, #ffa500);
+            border-radius: 10px;
+        }
+        
+        /* Penalty Card */
+        .penalty-card {
+            background: rgba(255, 215, 0, 0.1);
+            border: 3px solid rgba(255, 215, 0, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 30px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .penalty-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, #ffd700, #ffa500);
+        }
+        
+        .penalty-title {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #ffd700;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .teams-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 40px;
+            margin: 40px 0;
+        }
+        
+        .penalty-team {
+            flex: 1;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px 20px;
+            transition: all 0.3s;
+        }
+        
+        .penalty-team:hover {
+            border-color: rgba(255, 215, 0, 0.5);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
+        }
+        
+        .team-name {
+            font-size: 1.5em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+        
+        .penalty-input {
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 3px solid rgba(255, 215, 0, 0.3);
+            border-radius: 15px;
+            color: #fff;
+            font-size: 2.5em;
+            font-weight: 700;
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            transition: all 0.3s;
+        }
+        
+        .penalty-input:focus {
+            outline: none;
+            border-color: #ffd700;
+            background: rgba(255, 215, 0, 0.1);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+            transform: scale(1.05);
+        }
+        
+        .vs-divider {
+            font-size: 3em;
+            font-weight: 900;
+            color: #ffd700;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        /* Instructions */
+        .instructions {
+            background: rgba(255, 165, 0, 0.1);
+            border: 2px solid rgba(255, 165, 0, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 30px 0;
+            text-align: center;
+        }
+        
+        .instructions h3 {
+            color: #ffa500;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+        }
+        
+        .instructions p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+        
+        /* Button */
+        .btn {
+            padding: 20px 50px;
+            border: none;
+            border-radius: 15px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.3em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
+            color: #000;
+            width: 100%;
+            margin-top: 30px;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .btn:hover::before {
+            width: 400px;
+            height: 400px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(255, 215, 0, 0.4);
+        }
+        
+        .btn span {
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Score Display */
+        .score-display {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin: 30px 0;
+            font-size: 1.2em;
+        }
+        
+        .score-item {
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px 25px;
+            text-align: center;
+        }
+        
+        .score-label {
+            color: #ffd700;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .score-value {
+            color: #fff;
+            font-size: 1.5em;
+            font-weight: 700;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .teams-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+            .vs-divider {
+                order: 2;
+                font-size: 2em;
+            }
+            .hero h1 {
+                font-size: 2.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <h1>Penalty Shootout</h1>
+        <p>Sudden Death - Winner Takes All</p>
+    </div>
+    
+    <div class="main-container">
+        <div class="glass-card">
+            <div class="section-title">
+                <span>Penalty Shootout</span>
+            </div>
+            
+            <div class="instructions">
+                <h3>🎯 Shootout Rules</h3>
+                <p>Enter the number of penalties scored by each team. The team with the higher score wins and advances to the next round.</p>
+            </div>
+            
+            <div class="penalty-card">
+                <div class="penalty-title">⚽ Penalty Goals</div>
+                
+                <form method="post">
+                    <div class="teams-container">
+                        <div class="penalty-team">
+                            <div class="team-name">{{ team1 }}</div>
+                            <input type="number" name="penalty1" value="0" min="0" max="10" class="penalty-input" required>
+                        </div>
+                        
+                        <div class="vs-divider">PK</div>
+                        
+                        <div class="penalty-team">
+                            <div class="team-name">{{ team2 }}</div>
+                            <input type="number" name="penalty2" value="0" min="0" max="10" class="penalty-input" required>
+                        </div>
+                    </div>
+                    
+                    {% if regular_score %}
+                    <div class="score-display">
+                        <div class="score-item">
+                            <div class="score-label">Regular Time</div>
+                            <div class="score-value">{{ regular_score.0 }} - {{ regular_score.1 }}</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <button type="submit" class="btn">
+                        <span>🏆 Determine Winner</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

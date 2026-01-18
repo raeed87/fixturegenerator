@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Knockout Tournament</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Rajdhani', sans-serif;
+            background: #0a0e27;
+            color: #fff;
+            overflow-x: hidden;
+        }
+        
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(85, 0, 0, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(51, 0, 0, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(102, 0, 0, 0.15) 0%, transparent 50%),
+                linear-gradient(45deg, transparent 30%, rgba(85, 0, 0, 0.05) 50%, transparent 70%);
+            z-index: -1;
+            animation: backgroundShift 20s ease-in-out infinite;
+        }
+        
+        @keyframes backgroundShift {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(2deg) scale(1.02); }
+        }
+        
+        /* Hero Header */
+        .hero {
+            position: relative;
+            padding: 60px 20px;
+            text-align: center;
+            background: linear-gradient(135deg, #550000 0%, #330000 100%);
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+            margin-bottom: 60px;
+        }
+        
+        .hero::after {
+            content: '🥊';
+            position: absolute;
+            font-size: 200px;
+            opacity: 0.12;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: heroFloat 8s ease-in-out infinite;
+            will-change: transform;
+            filter: drop-shadow(0 0 30px rgba(85, 0, 0, 0.3));
+        }
+        
+        @keyframes heroFloat {
+            0%, 100% { transform: translate(-50%, -50%) rotate(-5deg) scale(1); }
+            25% { transform: translate(-45%, -55%) rotate(5deg) scale(1.05); }
+            50% { transform: translate(-50%, -60%) rotate(-2deg) scale(0.95); }
+            75% { transform: translate(-55%, -55%) rotate(3deg) scale(1.02); }
+        }
+        
+        .hero h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4em;
+            font-weight: 900;
+            background: linear-gradient(90deg, #fff, #ffcccb, #fff);
+            background-size: 200% 100%;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            animation: subtleShine 4s ease-in-out infinite;
+            will-change: background-position;
+        }
+        
+        @keyframes subtleShine {
+            0%, 100% { background-position: -100% 0; }
+            50% { background-position: 100% 0; }
+        }
+        
+        .hero p {
+            font-size: 1.3em;
+            color: rgba(255,255,255,0.8);
+            font-weight: 300;
+        }
+        
+        /* Main Container */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 30px 60px;
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 40px;
+        }
+        
+        /* Bracket Visualization */
+        .bracket-container {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(85, 0, 0, 0.08) 100%);
+            backdrop-filter: blur(20px);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            padding: 35px;
+            box-shadow: 
+                0 15px 50px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                0 0 80px rgba(85, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .bracket-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(85, 0, 0, 0.1), transparent, rgba(85, 0, 0, 0.05), transparent);
+            animation: bracketRotate 30s linear infinite;
+            z-index: -1;
+        }
+        
+        @keyframes bracketRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .bracket-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8em;
+            margin-bottom: 30px;
+            color: #fff;
+            text-align: center;
+            background: linear-gradient(90deg, #fff, #ff6b6b, #550000, #ff6b6b, #fff);
+            background-size: 300% 100%;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: titleShine 4s ease-in-out infinite;
+            text-shadow: 0 0 30px rgba(85, 0, 0, 0.5);
+            position: relative;
+        }
+        
+        .bracket-title::before {
+            content: '🏆';
+            position: absolute;
+            left: -40px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2em;
+            animation: trophyFloat 3s ease-in-out infinite;
+        }
+        
+        .bracket-title::after {
+            content: '🏆';
+            position: absolute;
+            right: -40px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2em;
+            animation: trophyFloat 3s ease-in-out infinite reverse;
+        }
+        
+        @keyframes titleShine {
+            0%, 100% { background-position: -100% 0; }
+            50% { background-position: 200% 0; }
+        }
+        
+        @keyframes trophyFloat {
+            0%, 100% { transform: translateY(-50%) rotate(-5deg); }
+            50% { transform: translateY(-60%) rotate(5deg); }
+        }
+        
+        .bracket-flow {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .bracket-round {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .bracket-round-title {
+            font-size: 1.1em;
+            color: #fff;
+            font-weight: 900;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, rgba(85, 0, 0, 0.3) 0%, rgba(139, 0, 0, 0.2) 100%);
+            padding: 12px 20px;
+            border-radius: 25px;
+            border: 2px solid rgba(85, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+            text-shadow: 0 0 10px rgba(85, 0, 0, 0.8);
+        }
+        
+        .bracket-round-title::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: roundShine 3s ease-in-out infinite;
+        }
+        
+        @keyframes roundShine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .bracket-matches {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            width: 100%;
+        }
+        
+        .bracket-match {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(85, 0, 0, 0.06) 100%);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 18px;
+            min-width: 220px;
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+        
+        .bracket-match::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+        
+        .bracket-match:hover::before {
+            transform: translateX(100%);
+        }
+        
+        .bracket-match.completed {
+            border-color: rgba(85, 0, 0, 0.7);
+            background: linear-gradient(135deg, rgba(85, 0, 0, 0.15) 0%, rgba(139, 0, 0, 0.1) 100%);
+            box-shadow: 0 8px 25px rgba(85, 0, 0, 0.3);
+        }
+        
+        .bracket-match.current {
+            border-color: #ffc107;
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.2) 0%, rgba(255, 152, 0, 0.15) 100%);
+            box-shadow: 
+                0 0 30px rgba(255, 193, 7, 0.5),
+                0 8px 25px rgba(255, 193, 7, 0.3);
+            animation: currentPulse 2s ease-in-out infinite;
+            transform: scale(1.05);
+        }
+        
+        @keyframes currentPulse {
+            0%, 100% { 
+                box-shadow: 
+                    0 0 30px rgba(255, 193, 7, 0.5),
+                    0 8px 25px rgba(255, 193, 7, 0.3);
+                transform: scale(1.05);
+            }
+            50% { 
+                box-shadow: 
+                    0 0 50px rgba(255, 193, 7, 0.8),
+                    0 12px 35px rgba(255, 193, 7, 0.5);
+                transform: scale(1.08);
+            }
+        }
+        
+        .bracket-team {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            margin: 3px 0;
+            border-radius: 8px;
+            font-size: 0.9em;
+            transition: all 0.2s;
+            background: rgba(255, 255, 255, 0.03);
+        }
+        
+        .bracket-team.winner {
+            background: linear-gradient(135deg, rgba(85, 0, 0, 0.4) 0%, rgba(139, 0, 0, 0.3) 100%);
+            color: #fff;
+            font-weight: 900;
+            border: 2px solid rgba(85, 0, 0, 0.7);
+            box-shadow: 
+                0 4px 15px rgba(85, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            animation: winnerGlow 3s ease-in-out infinite;
+        }
+        
+        @keyframes winnerGlow {
+            0%, 100% { box-shadow: 0 4px 15px rgba(85, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2); }
+            50% { box-shadow: 0 6px 20px rgba(85, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3); }
+        }
+        
+        .bracket-team.loser {
+            background: rgba(255, 255, 255, 0.02);
+            color: rgba(255, 255, 255, 0.4);
+            text-decoration: line-through;
+        }
+        
+        .bracket-score {
+            font-weight: 700;
+            font-family: 'Orbitron', sans-serif;
+            background: rgba(85, 0, 0, 0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8em;
+        }
+        
+        .bracket-vs {
+            text-align: center;
+            font-size: 0.7em;
+            color: rgba(255, 255, 255, 0.5);
+            margin: 2px 0;
+            font-weight: 700;
+        }
+        
+        .bracket-arrow {
+            font-size: 3em;
+            color: rgba(85, 0, 0, 0.8);
+            margin: 15px 0;
+            animation: arrowPulse 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 10px rgba(85, 0, 0, 0.5));
+            position: relative;
+        }
+        
+        .bracket-arrow::before {
+            content: '⚡';
+            position: absolute;
+            left: -30px;
+            animation: sparkle1 2s ease-in-out infinite;
+        }
+        
+        .bracket-arrow::after {
+            content: '⚡';
+            position: absolute;
+            right: -30px;
+            animation: sparkle2 2s ease-in-out infinite;
+        }
+        
+        @keyframes sparkle1 {
+            0%, 100% { opacity: 0; transform: scale(0.5) rotate(0deg); }
+            50% { opacity: 1; transform: scale(1) rotate(180deg); }
+        }
+        
+        @keyframes sparkle2 {
+            0%, 100% { opacity: 0; transform: scale(0.5) rotate(0deg); }
+            50% { opacity: 1; transform: scale(1) rotate(-180deg); }
+        }
+        
+        @keyframes arrowPulse {
+            0%, 100% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+        
+        .champion-display {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.3) 0%, rgba(85, 0, 0, 0.2) 50%, rgba(255, 215, 0, 0.3) 100%);
+            border: 4px solid rgba(255, 215, 0, 0.8);
+            border-radius: 25px;
+            padding: 25px;
+            text-align: center;
+            animation: championGlow 2s ease-in-out infinite;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .champion-display::before {
+            content: '✨';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 1.5em;
+            animation: sparkleRotate 3s linear infinite;
+        }
+        
+        .champion-display::after {
+            content: '✨';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.5em;
+            animation: sparkleRotate 3s linear infinite reverse;
+        }
+        
+        @keyframes sparkleRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes championGlow {
+            0%, 100% { 
+                box-shadow: 
+                    0 0 30px rgba(255, 215, 0, 0.4),
+                    0 0 60px rgba(255, 215, 0, 0.2);
+            }
+            50% { 
+                box-shadow: 
+                    0 0 50px rgba(255, 215, 0, 0.7),
+                    0 0 80px rgba(255, 215, 0, 0.4);
+            }
+        }
+        
+        .champion-team {
+            font-size: 1.3em;
+            font-weight: 900;
+            color: #ffd700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+        
+        .champion-label {
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.8);
+            text-transform: uppercase;
+        }
+        
+        /* Glass Card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            transform: translateZ(0);
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8em;
+            margin-bottom: 30px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .section-title::before {
+            content: '';
+            width: 5px;
+            height: 30px;
+            background: linear-gradient(to bottom, #550000, #330000);
+            border-radius: 10px;
+        }
+        
+        /* Match Card */
+        .match-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .match-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(to bottom, #550000, #330000);
+            transition: width 0.3s;
+        }
+        
+        .match-card:hover {
+            border-color: rgba(85, 0, 0, 0.5);
+            transform: translateX(10px);
+        }
+        
+        .match-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .match-title {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #550000;
+            margin-bottom: 5px;
+        }
+        
+        .match-subtitle {
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .match-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .team {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .team-name {
+            font-size: 1.3em;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .score-input {
+            width: 90px;
+            height: 90px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 3px solid rgba(255, 255, 255, 0.25);
+            border-radius: 18px;
+            color: #fff;
+            font-size: 2.2em;
+            font-weight: 900;
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .score-input:focus {
+            outline: none;
+            border-color: #550000;
+            background: rgba(85, 0, 0, 0.15);
+            box-shadow: 
+                0 0 30px rgba(85, 0, 0, 0.4),
+                inset 0 0 20px rgba(85, 0, 0, 0.1);
+            transform: scale(1.08);
+        }
+        
+        .vs-divider {
+            font-size: 2.5em;
+            font-weight: 900;
+            color: #550000;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            position: relative;
+            text-shadow: 
+                0 0 10px rgba(85, 0, 0, 0.5),
+                0 0 20px rgba(85, 0, 0, 0.3),
+                0 0 30px rgba(85, 0, 0, 0.1);
+            animation: vsGlow 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes vsGlow {
+            0% { 
+                text-shadow: 
+                    0 0 10px rgba(85, 0, 0, 0.5),
+                    0 0 20px rgba(85, 0, 0, 0.3),
+                    0 0 30px rgba(85, 0, 0, 0.1);
+            }
+            100% { 
+                text-shadow: 
+                    0 0 15px rgba(85, 0, 0, 0.8),
+                    0 0 25px rgba(85, 0, 0, 0.5),
+                    0 0 35px rgba(85, 0, 0, 0.3);
+            }
+        }
+        
+        /* Penalty Section */
+        .penalty-section {
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .penalty-title {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #ffd700;
+            margin-bottom: 15px;
+        }
+        
+        .penalty-inputs {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            align-items: center;
+        }
+        
+        .penalty-team {
+            text-align: center;
+        }
+        
+        .penalty-input {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1.5em;
+            font-weight: 700;
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            margin-top: 10px;
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 18px 35px;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn span {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #550000 0%, #330000 100%);
+            color: #fff;
+            width: 100%;
+            margin-top: 30px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+        
+        /* Winner Display */
+        .winner-display {
+            text-align: center;
+            padding: 80px 40px;
+        }
+        
+        .trophy {
+            font-size: 10em;
+            margin-bottom: 30px;
+            animation: trophyBounce 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.5));
+        }
+        
+        @keyframes trophyBounce {
+            0%, 100% { transform: translateY(0) rotate(-2deg); }
+            25% { transform: translateY(-15px) rotate(2deg); }
+            50% { transform: translateY(-25px) rotate(-1deg); }
+            75% { transform: translateY(-10px) rotate(1deg); }
+        }
+        
+        .winner-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #550000;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+        
+        .winner-subtitle {
+            font-size: 1.2em;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 40px;
+        }
+        
+        /* Progress Bar */
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            height: 20px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(135deg, #550000 0%, #330000 100%);
+            height: 100%;
+            transition: width 0.3s;
+        }
+        
+        .match-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107 0%, #ff8f00 100%);
+            color: #000;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            color: #fff;
+        }
+        
+        .analytics {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 25px;
+        }
+        
+        .analytics h4 {
+            color: #550000;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        
+        /* Penalty Dialog */
+        .penalty-dialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .penalty-content {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(85, 0, 0, 0.1) 100%);
+            backdrop-filter: blur(20px);
+            border: 3px solid rgba(255, 215, 0, 0.5);
+            border-radius: 25px;
+            padding: 40px;
+            text-align: center;
+            max-width: 400px;
+            animation: dialogAppear 0.3s ease-out;
+        }
+        
+        @keyframes dialogAppear {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .penalty-content h3 {
+            color: #ffd700;
+            font-size: 1.8em;
+            margin-bottom: 15px;
+        }
+        
+        .penalty-content p {
+            color: #fff;
+            margin-bottom: 25px;
+            font-size: 1.1em;
+        }
+        
+        .penalty-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .btn-team {
+            background: linear-gradient(135deg, #550000 0%, #330000 100%);
+            color: #fff;
+            flex: 1;
+        }
+        
+        .btn-cancel {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <h1>Knockout Tournament</h1>
+        <p>Single Elimination Championship</p>
+    </div>
+    
+    <div class="main-container">
+        <!-- Left Panel: Current Match -->
+        <div class="glass-card">
+            {% if knockout_data.winner %}
+            <div class="winner-display">
+                <div class="trophy">🏆</div>
+                <div class="winner-title">{{ knockout_data.winner }} Wins!</div>
+                <div class="winner-subtitle">Tournament Champion</div>
+                <a href="/" class="btn btn-primary"><span>Return Home</span></a>
+            </div>
+            {% elif current_match %}
+            <div class="section-title">
+                <span>{{ knockout_data.round_name }}</span>
+            </div>
+            
+            <div style="background: rgba(85, 0, 0, 0.1); border: 2px solid rgba(85, 0, 0, 0.3); border-radius: 12px; padding: 15px; margin: 15px 0; text-align: center;">
+                <div style="color: #ffaaaa; font-weight: 700; font-size: 1em;">🥊 Match Progress</div>
+                <div style="color: rgba(255, 255, 255, 0.9); font-size: 0.95em; margin-top: 5px;">
+                    Match {{ match_number }} of {{ total_matches }} - {{ knockout_data.teams_remaining }} teams remaining
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {% widthratio match_number total_matches 100 %}%"></div>
+                </div>
+            </div>
+            
+            <div class="match-card">
+                <div class="match-header">
+                    <div class="match-title">{{ knockout_data.round_name }}</div>
+                    <div class="match-subtitle">Win or Go Home</div>
+                </div>
+                <form method="post" id="matchForm">
+                    <div class="match-content">
+                        <div class="team">
+                            <div class="team-name">{{ current_match.0 }}</div>
+                            <input type="number" name="score1" value="0" min="0" max="20" class="score-input">
+                        </div>
+                        <div class="vs-divider">VS</div>
+                        <div class="team">
+                            <div class="team-name">{{ current_match.1 }}</div>
+                            <input type="number" name="score2" value="0" min="0" max="20" class="score-input">
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="btn btn-danger" onclick="submitMatch()">
+                        <span>Submit Result</span>
+                    </button>
+                </form>
+                
+                <!-- Penalty Dialog -->
+                <div id="penaltyDialog" class="penalty-dialog" style="display: none;">
+                    <div class="penalty-content">
+                        <h3>🎯 Penalty Shootout</h3>
+                        <p>Match is tied! Which team wins the penalty shootout?</p>
+                        <div class="penalty-buttons">
+                            <button type="button" class="btn btn-team" onclick="selectWinner('{{ current_match.0 }}')">{{ current_match.0 }}</button>
+                            <button type="button" class="btn btn-team" onclick="selectWinner('{{ current_match.1 }}')">{{ current_match.1 }}</button>
+                        </div>
+                        <button type="button" class="btn btn-cancel" onclick="closePenaltyDialog()">Cancel</button>
+                    </div>
+                </div>
+                
+                <script>
+                function submitMatch() {
+                    const score1 = document.querySelector('input[name="score1"]').value;
+                    const score2 = document.querySelector('input[name="score2"]').value;
+                    
+                    if (score1 === score2) {
+                        document.getElementById('penaltyDialog').style.display = 'flex';
+                    } else {
+                        document.getElementById('matchForm').submit();
+                    }
+                }
+                
+                function selectWinner(winner) {
+                    const form = document.getElementById('matchForm');
+                    const winnerInput = document.createElement('input');
+                    winnerInput.type = 'hidden';
+                    winnerInput.name = 'penalty_winner';
+                    winnerInput.value = winner;
+                    form.appendChild(winnerInput);
+                    form.submit();
+                }
+                
+                function closePenaltyDialog() {
+                    document.getElementById('penaltyDialog').style.display = 'none';
+                }
+                </script>
+            </div>
+            {% else %}
+            <div class="winner-display">
+                <div class="trophy">🏆</div>
+                <div class="winner-title">Tournament Complete</div>
+                <div class="winner-subtitle">All matches finished</div>
+                <a href="/" class="btn btn-primary"><span>Return Home</span></a>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Right Panel: Tournament Bracket -->
+        <div class="bracket-container">
+            <div class="bracket-title">
+                🏆 Tournament Bracket
+            </div>
+            
+            <div class="bracket-flow">
+                {% for round_data in bracket_visualization %}
+                <div class="bracket-round">
+                    <div class="bracket-round-title">{{ round_data.name }}</div>
+                    <div class="bracket-matches">
+                        {% for match in round_data.matches %}
+                        <div class="bracket-match {% if match.completed %}completed{% elif match.current %}current{% endif %}">
+                            {% if match.teams|length == 2 %}
+                            <div class="bracket-team {% if match.winner == match.teams.0 %}winner{% elif match.completed %}loser{% endif %}">
+                                <span>{{ match.teams.0 }}</span>
+                                {% if match.completed %}<span class="bracket-score">{{ match.score.0 }}</span>{% endif %}
+                            </div>
+                            <div class="bracket-vs">VS</div>
+                            <div class="bracket-team {% if match.winner == match.teams.1 %}winner{% elif match.completed %}loser{% endif %}">
+                                <span>{{ match.teams.1 }}</span>
+                                {% if match.completed %}<span class="bracket-score">{{ match.score.1 }}</span>{% endif %}
+                            </div>
+                            {% elif match.teams|length == 1 %}
+                            <div class="champion-display">
+                                <div class="champion-team">🏆 {{ match.teams.0 }}</div>
+                                <div class="champion-label">Tournament Champion</div>
+                            </div>
+                            {% else %}
+                            <div class="bracket-team">
+                                <span>TBD</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% if not forloop.last %}
+                <div class="bracket-arrow">⬇️</div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

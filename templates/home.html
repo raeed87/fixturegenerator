@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tournament Manager</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Rajdhani', sans-serif;
+            background: #0a0e27;
+            color: #fff;
+            overflow-x: hidden;
+        }
+        
+        /* Animated Background */
+        body::before {
+            content: '⚽';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 121, 63, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(138, 201, 38, 0.1) 0%, transparent 50%);
+            z-index: -1;
+        }
+        
+        /* Hero Header */
+        .hero {
+            position: relative;
+            padding: 60px 20px;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+            margin-bottom: 60px;
+        }
+        
+        .hero::after {
+            content: '⚽';
+            position: absolute;
+            font-size: 200px;
+            opacity: 0.08;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: float 6s ease-in-out infinite;
+            will-change: transform;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+            50% { transform: translate(-50%, -55%) rotate(180deg); }
+        }
+        
+        .hero h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4em;
+            font-weight: 900;
+            background: linear-gradient(90deg, #fff, #ffd89b, #fff);
+            background-size: 200% 100%;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            animation: subtleShine 4s ease-in-out infinite;
+            will-change: background-position;
+        }
+        
+        @keyframes subtleShine {
+            0%, 100% { background-position: -100% 0; }
+            50% { background-position: 100% 0; }
+        }
+        
+        .hero p {
+            font-size: 1.3em;
+            color: rgba(255,255,255,0.8);
+            font-weight: 300;
+        }
+        
+        /* Main Container */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 30px 60px;
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 40px;
+        }
+        
+        /* Card Styles */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            transform: translateZ(0);
+        }
+        
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            transition: 0.5s;
+        }
+        
+        .glass-card:hover::before {
+            left: 100%;
+        }
+        
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8em;
+            margin-bottom: 30px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .section-title::before {
+            content: '';
+            width: 5px;
+            height: 30px;
+            background: linear-gradient(to bottom, #667eea, #764ba2);
+            border-radius: 10px;
+        }
+        
+        /* Team Input Section */
+        .team-input-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .custom-input {
+            flex: 1;
+            padding: 18px 25px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1.1em;
+            font-family: 'Rajdhani', sans-serif;
+            transition: all 0.3s;
+        }
+        
+        .custom-input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .custom-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 18px 35px;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn span {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: #fff;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: #fff;
+        }
+        
+        .btn-small {
+            padding: 10px 20px;
+            font-size: 0.9em;
+        }
+        
+        /* Team Counter */
+        .team-counter {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            margin: 30px 0;
+            position: relative;
+        }
+        
+        .team-counter .number {
+            font-size: 3em;
+            font-weight: 700;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .team-counter .label {
+            font-size: 1.1em;
+            color: rgba(255, 255, 255, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        /* Custom Table */
+        .custom-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+            margin: 20px 0;
+        }
+        
+        .custom-table thead th {
+            background: rgba(102, 126, 234, 0.2);
+            padding: 15px;
+            text-align: left;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9em;
+            color: #667eea;
+        }
+        
+        .custom-table thead th:first-child {
+            border-radius: 10px 0 0 10px;
+        }
+        
+        .custom-table thead th:last-child {
+            border-radius: 0 10px 10px 0;
+        }
+        
+        .custom-table tbody tr {
+            background: rgba(255, 255, 255, 0.03);
+            transition: all 0.3s;
+        }
+        
+        .custom-table tbody tr:hover {
+            background: rgba(102, 126, 234, 0.1);
+            transform: scale(1.02);
+        }
+        
+        .custom-table tbody td {
+            padding: 18px 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .custom-table tbody td:first-child {
+            border-left: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 10px 0 0 10px;
+            font-weight: 700;
+            color: #667eea;
+        }
+        
+        .custom-table tbody td:last-child {
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 0 10px 10px 0;
+            text-align: center;
+        }
+        
+        /* Tournament Cards */
+        .tournament-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .tournament-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .tournament-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(to bottom, #667eea, #764ba2);
+            transition: width 0.3s;
+            pointer-events: none;
+        }
+        
+        .tournament-card:hover {
+            border-color: rgba(102, 126, 234, 0.5);
+            transform: translateX(10px);
+        }
+        
+        .tournament-card:hover::before {
+            width: 100%;
+            opacity: 0.1;
+        }
+        
+        .tournament-card h3 {
+            font-size: 1.6em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .tournament-card p {
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 20px;
+            font-size: 1.05em;
+        }
+        
+        .tournament-card form {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .tournament-card label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1em;
+        }
+        
+        .tournament-card input[type="number"] {
+            width: 70px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #fff;
+            text-align: center;
+            font-size: 1em;
+            pointer-events: auto;
+            z-index: 10;
+            position: relative;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 1.2em;
+        }
+        
+        .empty-state::before {
+            content: '📋';
+            display: block;
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+            .hero h1 {
+                font-size: 2.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <h1>Tournament Pro</h1>
+        <p>Elite Football Tournament Management System</p>
+    </div>
+    
+    <div class="main-container">
+        <!-- Left Panel: Team Management -->
+        <div class="glass-card">
+            <div class="section-title">
+                <span>Team Management</span>
+            </div>
+            
+            <form method="post" action="/add-team/">
+                <div class="team-input-group">
+                    <input type="text" name="name" class="custom-input" placeholder="Enter team name..." required maxlength="25">
+                    <button type="submit" class="btn btn-primary"><span>Add Team</span></button>
+                </div>
+            </form>
+            
+            <div class="team-counter">
+                <div class="number">{{ teams|length }}</div>
+                <div class="label">Teams Registered</div>
+            </div>
+            
+            {% if teams %}
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Team Name</th>
+                        <th style="text-align: center;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for team in teams %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td><strong>{{ team }}</strong></td>
+                        <td>
+                            <form method="post" action="/delete-team/{{ forloop.counter0 }}/" style="display: inline;">
+                                <button type="submit" class="btn btn-danger btn-small"><span>Remove</span></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <form method="post" action="/clear-teams/">
+                <button type="submit" class="btn btn-danger" style="width: 100%;"><span>Clear All Teams</span></button>
+            </form>
+            {% else %}
+            <div class="empty-state">
+                No teams registered yet<br>Start by adding your first team
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Right Panel: Tournament Selection -->
+        <div class="glass-card">
+            <div class="section-title">
+                <span>Tournament Formats</span>
+            </div>
+            
+            <div class="tournament-grid">
+                <div class="tournament-card">
+                    <h3>🥊 Knockout</h3>
+                    <p>Single elimination bracket - Win or go home</p>
+                    {% if knockout_error %}
+                    <div style="background: rgba(217, 83, 79, 0.2); border: 2px solid #d9534f; border-radius: 8px; padding: 15px; margin: 15px 0; text-align: center;">
+                        <div style="color: #d9534f; font-weight: 700; font-size: 0.9em;">⚠️ {{ knockout_error }}</div>
+                    </div>
+                    {% endif %}
+                    <form method="post" action="/start-knockout/">
+                        <button type="submit" class="btn btn-success" style="flex: 1;"><span>Launch</span></button>
+                    </form>
+                </div>
+                
+                <div class="tournament-card">
+                    <h3>🔄 League</h3>
+                    <p>Round-robin format - Everyone plays everyone</p>
+                    <form method="post" action="/start-league/">
+                        <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                            <span style="font-size: 1em;">Rounds:</span>
+                            <input type="number" name="num_rounds" value="1" min="1" max="10" style="width: 80px; padding: 12px; background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 8px; color: #fff; text-align: center; font-size: 1.1em; font-weight: 700;">
+                        </label>
+                        <button type="submit" class="btn btn-success" style="flex: 1; width: 100%;"><span>Launch</span></button>
+                    </form>
+                </div>
+                
+                <div class="tournament-card">
+                    <h3>🎯 Multi-Stage</h3>
+                    <p>Group stage followed by knockout playoffs</p>
+                    <form method="post" action="/start-multistage/">
+                        <button type="submit" class="btn btn-success" style="flex: 1;"><span>Launch</span></button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
